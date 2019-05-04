@@ -684,8 +684,8 @@ int main() {
                     }
                     break;
                 default:
-                    if (char c { formula[i] }; !(c == ' ' || c == '\n' ||
-                                                c == '\t' || c == '\0')) {
+                    if (char ch { formula[i] }; !(ch == ' ' || ch == '\n' ||
+                                                 ch == '\t' || ch == '\0')) {
                         std::cout << "That char I didn't understand\n";
                     }
                     break;
