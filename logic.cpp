@@ -5,6 +5,69 @@
 #include <memory>
 #include <utility>
 
+std::vector<std::string>
+split(const std::string& str, const std::string& delim);
+
+// NEEDS IMPROVEMENT: documentation
+/**
+ *  @brief  Separates a given string into a list
+ *  @param str    String to be separated
+ *  @param delim  Delimitier string
+ *  @return A list containing substrings of @a str
+*/
+std::vector<std::string>
+split(const std::string& str, const std::string& delim)
+{
+    std::vector<std::string> ret;
+    std::size_t st { 0 }, ed { 0 };
+    for (ed =  str.find(delim, st);
+         ed != std::string::npos;
+         ed =  str.find(delim, st)) {
+        if (auto sub { str.substr(st, ed - st) }; sub.size() != 0) {
+            ret.push_back(sub);
+        }
+        st = ed + delim.size();
+    }
+    // maybe do that better
+    if (auto sub { str.substr(st, str.size() - st) }; sub.size() != 0) {
+        ret.push_back(sub);
+    }
+    return ret;
+}
+/** TESTS
+ *  split("12.34.5", ".") == { "12", "34", "5" }
+ *  split("2,.22.2,2", "2") == { ",.", ".", "," }
+ *  split("aaaaa", "a") == {}
+ *  split("ok", " ") == { "ok" }
+*/
+
+template <typename T>
+bool operator==(const std::vector<T> a, const std::vector<T> b) {
+    if (a.size() != b.size()) return false;
+    for (std::size_t i { 0 }; i < a.size(); ++i) {
+        if (a[i] != b[i]) return false;
+    }
+    return true;
+}
+
+int main() {
+    auto exp { [] (bool cond) {
+        if (cond) std::cout << "test passed\n";
+        else std::cout << "test not passed\n";
+    } };
+    for (const auto& x : split("2,.22.2,2", "2")) {
+        std::cout << x << '\n';
+    }
+    std::cout << '\n';
+    exp(split("12.34.5", ".") == std::vector<std::string>{ "12", "34", "5" });
+    exp(split("2,.22.2,2", "2") == std::vector<std::string>{ ",.", ".", "," });
+    exp(split("aaaaa", "a") == std::vector<std::string>{});
+    exp(split("ok", " ") == std::vector<std::string>{ "ok" });
+    return 0;
+}
+
+// Old part:
+
 enum class TokenType {
     implication,
     disjunction,
@@ -641,93 +704,93 @@ private:
     //     }
     // }
 };
-int main() {
-    std::string formula;
-    std::getline(std::cin, formula);
-    std::vector<Token> tokens;
-    std::stringstream curr_atom;
-    for (std::size_t i { 0 }; i < formula.size(); ++i) {
-        if (char c { formula[i] }; (c >= 'a' && c <= 'z') ||
-                                   (c >= 'A' && c <= 'Z') ||
-                                   (c >= '0' && c <= '9') ||
-                                    c == '_') {
-            curr_atom << c;
-        } else {
-            if (curr_atom.str().size() > 0) {
-                tokens.emplace_back(TokenType::atom, curr_atom.str());
-                curr_atom.clear();
-                curr_atom.str("");
-            }
-            switch (formula[i]) {
-                case '&':
-                case '*':
-                    tokens.emplace_back(TokenType::conjunction);
-                    break;
-                case '|':
-                case '+':
-                    tokens.emplace_back(TokenType::disjunction);
-                    break;
-                case '!':
-                case '~':
-                    tokens.emplace_back(TokenType::negation);
-                    break;
-                case '(':
-                    tokens.emplace_back(TokenType::start_formula);
-                    break;
-                case ')':
-                    tokens.emplace_back(TokenType::end_formula);
-                    break;
-                case '-':
-                    if (formula[i + 1] == '>') {
-                        tokens.emplace_back(TokenType::implication);
-                        ++i;
-                    }
-                    break;
-                default:
-                    if (char ch { formula[i] }; !(ch == ' ' || ch == '\n' ||
-                                                 ch == '\t' || ch == '\0')) {
-                        std::cout << "That char I didn't understand\n";
-                    }
-                    break;
-            }
-        }
-    }
-    if (curr_atom.str().size() > 0) {
-        tokens.emplace_back(TokenType::atom, curr_atom.str());
-        curr_atom.clear();
-        curr_atom.str("");
-    }
-    for (const auto& tok : tokens) {
-        switch (tok.getType()) {
-            case TokenType::conjunction:
-                std::cout << "conj(&)";
-                break;
-            case TokenType::implication:
-                std::cout << "impl(->)";
-                break;
-            case TokenType::disjunction:
-                std::cout << "disj(|)";
-                break;
-            case TokenType::negation:
-                std::cout << "neg(!)";
-                break;
-            case TokenType::start_formula:
-                std::cout << "st(()";
-                break;
-            case TokenType::end_formula:
-                std::cout << "ed())";
-                break;
-            case TokenType::atom:
-                std::cout << "atom(" << tok.getValue() << ")";
-                break;
-            default:
-                break;
-        }
-    }
-    std::cout << '\n';
-    PrecedenceParser parser(std::move(tokens));
-    parser.parse();
-    parser.print();
-    // std::cout << formula << "\n";
-    return 0;
-}
+// int main() {
+//     std::string formula;
+//     std::getline(std::cin, formula);
+//     std::vector<Token> tokens;
+//     std::stringstream curr_atom;
+//     for (std::size_t i { 0 }; i < formula.size(); ++i) {
+//         if (char c { formula[i] }; (c >= 'a' && c <= 'z') ||
+//                                    (c >= 'A' && c <= 'Z') ||
+//                                    (c >= '0' && c <= '9') ||
+//                                     c == '_') {
+//             curr_atom << c;
+//         } else {
+//             if (curr_atom.str().size() > 0) {
+//                 tokens.emplace_back(TokenType::atom, curr_atom.str());
+//                 curr_atom.clear();
+//                 curr_atom.str("");
+//             }
+//             switch (formula[i]) {
+//                 case '&':
+//                 case '*':
+//                     tokens.emplace_back(TokenType::conjunction);
+//                     break;
+//                 case '|':
+//                 case '+':
+//                     tokens.emplace_back(TokenType::disjunction);
+//                     break;
+//                 case '!':
+//                 case '~':
+//                     tokens.emplace_back(TokenType::negation);
+//                     break;
+//                 case '(':
+//                     tokens.emplace_back(TokenType::start_formula);
+//                     break;
+//                 case ')':
+//                     tokens.emplace_back(TokenType::end_formula);
+//                     break;
+//                 case '-':
+//                     if (formula[i + 1] == '>') {
+//                         tokens.emplace_back(TokenType::implication);
+//                         ++i;
+//                     }
+//                     break;
+//                 default:
+//                     if (char ch { formula[i] }; !(ch == ' ' || ch == '\n' ||
+//                                                  ch == '\t' || ch == '\0')) {
+//                         std::cout << "That char I didn't understand\n";
+//                     }
+//                     break;
+//             }
+//         }
+//     }
+//     if (curr_atom.str().size() > 0) {
+//         tokens.emplace_back(TokenType::atom, curr_atom.str());
+//         curr_atom.clear();
+//         curr_atom.str("");
+//     }
+//     for (const auto& tok : tokens) {
+//         switch (tok.getType()) {
+//             case TokenType::conjunction:
+//                 std::cout << "conj(&)";
+//                 break;
+//             case TokenType::implication:
+//                 std::cout << "impl(->)";
+//                 break;
+//             case TokenType::disjunction:
+//                 std::cout << "disj(|)";
+//                 break;
+//             case TokenType::negation:
+//                 std::cout << "neg(!)";
+//                 break;
+//             case TokenType::start_formula:
+//                 std::cout << "st(()";
+//                 break;
+//             case TokenType::end_formula:
+//                 std::cout << "ed())";
+//                 break;
+//             case TokenType::atom:
+//                 std::cout << "atom(" << tok.getValue() << ")";
+//                 break;
+//             default:
+//                 break;
+//         }
+//     }
+//     std::cout << '\n';
+//     PrecedenceParser parser(std::move(tokens));
+//     parser.parse();
+//     parser.print();
+//     // std::cout << formula << "\n";
+//     return 0;
+// }
