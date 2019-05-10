@@ -4,6 +4,8 @@
 #include <vector>
 #include <memory>
 #include <utility>
+#include <algorithm>
+#include <iterator>
 
 std::vector<std::string>
 split(const std::string& str, const std::string& delim);
@@ -39,30 +41,38 @@ split(const std::string& str, const std::string& delim)
  *  split("2,.22.2,2", "2") == { ",.", ".", "," }
  *  split("aaaaa", "a") == {}
  *  split("ok", " ") == { "ok" }
+ *  split("abcdabcde", "cd") == { "ab", "ab", "e" }
 */
 
-template <typename T>
-bool operator==(const std::vector<T> a, const std::vector<T> b) {
-    if (a.size() != b.size()) return false;
-    for (std::size_t i { 0 }; i < a.size(); ++i) {
-        if (a[i] != b[i]) return false;
-    }
-    return true;
-}
-
 int main() {
-    auto exp { [] (bool cond) {
-        if (cond) std::cout << "test passed\n";
-        else std::cout << "test not passed\n";
-    } };
-    for (const auto& x : split("2,.22.2,2", "2")) {
-        std::cout << x << '\n';
+    // auto exp { [] (bool cond) {
+    //     if (cond) std::cout << "test passed\n";
+    //     else std::cout << "test not passed\n";
+    // } };
+    // for (const auto& x : split("2,.22.2,2", "2")) {
+    //     std::cout << x << '\n';
+    // }
+    // std::cout << '\n';
+    // exp(split("12.34.5", ".") == std::vector<std::string>{ "12", "34", "5" });
+    // exp(split("2,.22.2,2", "2") == std::vector<std::string>{ ",.", ".", "," });
+    // exp(split("aaaaa", "a") == std::vector<std::string>{});
+    // exp(split("ok", " ") == std::vector<std::string>{ "ok" });
+    // exp(split("abcdabcde", "cd") == std::vector<std::string>{ "ab", "ab", "e" });
+    // auto vec { split("!p->r&s,q&!p?r", "?") };
+    std::vector<std::pair<std::string, std::string>> tests {
+        { "?r", "?" },
+        { "!p->r&s,q&!p?r|s", "?" },
+        { "?r|s,!p->r&s,q&!p", "?" },
+    };
+    std::vector<std::vector<std::string>> res;
+    res.resize(tests.size());
+    std::transform(tests.begin(), tests.end(), res.begin(), [] (std::pair<std::string, std::string> p) { return split(p.first, p.second); });
+    // auto vec { split("?r", "?") };
+    using str_writer = std::ostream_iterator<std::string>;
+    for (const auto& vec : res) {
+        std::copy(vec.begin(), vec.end(), str_writer{std::cout, "kkk"});
+        std::cout << '\n';
     }
-    std::cout << '\n';
-    exp(split("12.34.5", ".") == std::vector<std::string>{ "12", "34", "5" });
-    exp(split("2,.22.2,2", "2") == std::vector<std::string>{ ",.", ".", "," });
-    exp(split("aaaaa", "a") == std::vector<std::string>{});
-    exp(split("ok", " ") == std::vector<std::string>{ "ok" });
     return 0;
 }
 
