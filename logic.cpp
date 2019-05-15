@@ -458,9 +458,9 @@ private:
             errors.push_back("error in 'implication first'\n");
             return nullptr;
         }
-        while (current != tokens_.cend() && current->getType() == TokenType::implication) {
+        if (current != tokens_.cend() && current->getType() == TokenType::implication) {
             ++current;
-            auto next { disjunction() };
+            auto next { implication() };
             if (!next) {
                 valid = false;
                 errors.push_back("error in 'implication next'\n");
